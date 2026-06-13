@@ -410,12 +410,15 @@
           <option value="computer">B.Sc Computer Science</option>
           <option value="statistics">B.Sc Statistics</option>
           <option value="geology">B.Sc Geology</option>
+          <option value="botany">B.Sc Botany</option>
+          <option value="zoology">B.Sc Zoology</option>
           <option value="forensic">B.Sc Forensic Science</option>
         </optgroup>
         <optgroup label="B.A Arts">
           <option value="english">B.A English</option>
           <option value="history">B.A History</option>
           <option value="economics">B.A Economics</option>
+          <option value="polsci">B.A Political Science</option>
         </optgroup>
         <optgroup label="Commerce">
           <option value="bcom">B.Com</option>
@@ -495,7 +498,10 @@
 
   <div id="result"></div>
 
-  <div class="footer">For reference only. Always verify with official MGU CAP guidelines.</div>
+  <div class="footer">
+    For reference only. Always verify with official MGU CAP guidelines.<br>
+    <span style="margin-top:6px;display:inline-block;color:#6c7584;">Developed by <span style="color:#a89fff;font-weight:600;">Dr. Noble P. Abraham</span></span>
+  </div>
 </div>
 
 <script>
@@ -614,11 +620,14 @@ function loadFields(){
     computer:  always + subjectDivider + field('maths','Mathematics') + field('computer','Computer Science','(best of two used)'),
     statistics:always + subjectDivider + field('maths','Maths / Statistics') + field('studiedMaths','Studied Maths at +2?','(1 = Yes, 0 = No)', true),
     geology:   always + subjectDivider + field('physics','Physics') + field('chemistry','Chemistry') + field('maths','Mathematics') + field('biology','Biology') + field('geology','Geology'),
+    botany:    always + subjectDivider + field('biology','Biology') + field('botany','Botany','(best of Bio/Botany used)'),
+    zoology:   always + subjectDivider + field('biology','Biology') + field('zoology','Zoology','(best of Bio/Zoology used)'),
     forensic:  always,
     english:   field('total','Total Marks') + field('englishmark','English Marks','(counted ×2)') + field('optionalEnglish','English as Optional?','(1 = Yes, 0 = No)', true),
     history:   always + subjectDivider + field('history','History Marks') + field('historyWeight','History Studied at +2?','(1 = Yes, 0 = No)', true),
     economics: always + subjectDivider + field('economics','Economics Marks') + field('ecoWeight','Economics Studied at +2?','(1 = Yes, 0 = No)', true),
     bcom:      always + subjectDivider + field('commerce','Commerce Marks'),
+    polsci:    always + subjectDivider + field('polsci','Political Science Marks') + field('polsciWeight','Political Science Studied at +2?','(1 = Yes, 0 = No)', true),
   };
 
   area.innerHTML = map[p] || '';
@@ -627,7 +636,7 @@ function loadFields(){
 function getVal(id){ const e=document.getElementById(id); return e?+e.value:0; }
 
 /* Get a mark value, scaling if CBSE/ISC. Flag fields (0/1) are never scaled. */
-const FLAG_IDS = ['studiedMaths','optionalEnglish','historyWeight','ecoWeight'];
+const FLAG_IDS = ['studiedMaths','optionalEnglish','historyWeight','ecoWeight','polsciWeight'];
 function getMark(id){
   return FLAG_IDS.includes(id) ? getVal(id) : scale(getVal(id));
 }
@@ -681,6 +690,12 @@ function calculateIndex(){
     case 'geology':
       build(Math.max(getMark('physics'),getMark('chemistry'),getMark('maths'),getMark('biology'),getMark('geology')),`Best Subject Score${board!=='hse'?` (×2)`:''}`);
       break;
+    case 'botany':
+      build(Math.max(getMark('biology'),getMark('botany')),`Best of Biology/Botany${board!=='hse'?` (×2)`:''}`);
+      break;
+    case 'zoology':
+      build(Math.max(getMark('biology'),getMark('zoology')),`Best of Biology/Zoology${board!=='hse'?` (×2)`:''}`);
+      break;
     case 'forensic': build(0,'(no subject weightage)'); break;
     case 'english':{
       const scaledTotal   = getMark('total');
@@ -707,6 +722,11 @@ function calculateIndex(){
       break;
     }
     case 'bcom': build(getMark('commerce'),`Commerce${board!=='hse'?` (×2)`:''}`); break;
+    case 'polsci':{
+      const pw = getVal('polsciWeight')===1?50:0;
+      build(getMark('polsci'),`Political Science${board!=='hse'?` (×2)`:''}`,[{label:'Subject Weightage',val:pw}]);
+      break;
+    }
   }
 
   const boardBadge = board!=='hse'
